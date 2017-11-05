@@ -1,0 +1,19 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">電子公文交換</div>
+
+
+  <table class="ui celled table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>City</th>
+      </tr>
+    </thead>
+    <tr *ngFor="let p of people">
+      <td>{{ p.name }}</td>
+      <td>{{ p.age }}</td>
+      <td>{{ p.city }}</td>
+    </tr>
+  </table>
+</div>
