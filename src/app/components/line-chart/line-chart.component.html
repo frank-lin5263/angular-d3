@@ -1,19 +1,38 @@
 <div class="panel panel-primary">
-  <div class="panel-heading">電子公文交換</div>
-
-
-  <table class="ui celled table">
+  <div class="panel-heading">{{title}}</div>
+  <div class="panel-body">
+    <div class="form-horizontal well well-sm archives-well-fixed">
+      <div class="form-group">
+        <label class="col-md-offset-2 col-md-2 control-label">日期</label>
+        <div class="col-md-2">
+          <select class="form-control" name="docType">
+            <option value="">最近1日</option>
+            <option value="">最近7日</option>
+            <option value="">最近30日</option>
+          </select>
+        </div>
+      </div>
+    </div>    
+  </div>
+</div>
+<div class="center-block" id="lineChart"></div>
+<table class="ui celled table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Age</th>
-        <th>City</th>
+        <th class='col-md-2 text-center'>日期</th>
+        <th class='col-md-2 text-center'>發文量</th>
+        <th class='col-md-2 text-center'>使用者確認量</th>
+        <th class='col-md-2 text-center'>使用者確認比例</th>
+        <th class='col-md-2 text-center'>發文異常量</th>
+        <th class='col-md-2 text-center'>發文異常比例</th>
       </tr>
     </thead>
-    <tr *ngFor="let p of people">
-      <td>{{ p.name }}</td>
-      <td>{{ p.age }}</td>
-      <td>{{ p.city }}</td>
+    <tr *ngFor="let s of sendReport">
+      <td class='text-center'>{{ s.data }}</td>
+      <td class='text-center'>{{ s.send }}</td>
+      <td class='text-center'>{{ s.sendAck }}</td>
+      <td class='text-center'>{{ s.sendAckRat }}</td>
+      <td class='text-center'>{{ s.sendErr }}</td>
+      <td class='text-center'>{{ s.sendErrRate }}</td>      
     </tr>
   </table>
-</div>

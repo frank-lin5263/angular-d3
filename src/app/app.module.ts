@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { LineChartComponent } from './components/line-chart/line-chart.component';
 
+
 const appRoutes: Routes = [
   { path: '', component: LineChartComponent }
 ];
