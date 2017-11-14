@@ -20,7 +20,7 @@ export class LineChartComponent implements OnInit {
   title = '收發文狀態統計';
 
   svg: any;
-  gdpmax: any;
+  maxValue: any;
 
   gMark: any;
 
@@ -38,7 +38,7 @@ export class LineChartComponent implements OnInit {
     .append('path')
     .attr('transform', 'translate(' + padding.left + ',' +  padding.top  + ')')
     .attr('d', function(d) {
-      return linePath(d.gdp);
+      return linePath(d.values);
     })
     .attr('fill', 'none')
     .attr('stroke-width', 3)
@@ -51,8 +51,8 @@ export class LineChartComponent implements OnInit {
     const width = 1180;
     const height = 480;
     const padding = { top: 50 , right: 50, bottom: 50, left: 50 };
-    this.gdpmax = d3Array.max(dataset, function(c) {
-      return d3Array.max(c.gdp, function(d) {
+    this.maxValue = d3Array.max(dataset, function(c) {
+      return d3Array.max(c.values, function(d) {
         return d[1];
       });
     });
@@ -67,7 +67,7 @@ export class LineChartComponent implements OnInit {
       .range([ 0 , width - padding.left - padding.right ]);
 
     const yScale = d3Scale.scaleLinear()
-      .domain([0, this.gdpmax * 1.1])
+      .domain([0, this.maxValue * 1.1])
       .range([ height - padding.top - padding.bottom , 0 ]);
 
     const linePath = d3Shape.line()
@@ -122,7 +122,7 @@ export class LineChartComponent implements OnInit {
           vLine.style('display', 'none');
       })
       .on('mousemove',  function() {
-        const data = dataset[0].gdp;
+        const data = dataset[0].values;
 
         // 取得滑鼠相對於透明矩形左上角的座標，左上角座標為(0,0)
         const mouseX = d3.mouse(this)[0] - padding.left;
@@ -140,7 +140,7 @@ export class LineChartComponent implements OnInit {
         const year = x0;
         const gdp = [];
         for ( let k = 0; k < dataset.length; k++ ) {
-          gdp[k] = { id: dataset[k].id, value: dataset[k].gdp[index][1]};
+          gdp[k] = { id: dataset[k].id, value: dataset[k].values[index][1]};
         }
 
         // 設定提示框的標題文字（年份）
