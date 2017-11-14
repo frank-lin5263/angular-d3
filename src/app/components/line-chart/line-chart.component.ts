@@ -20,7 +20,7 @@ export class LineChartComponent implements OnInit {
   title = '收發文狀態統計';
 
   padding = { top: 50 , right: 50, bottom: 50, left: 50 };
-
+  data: any;
   svg: any;
   maxValue: any;
 
@@ -38,6 +38,15 @@ export class LineChartComponent implements OnInit {
 
   ngOnInit() {
     this.sendReport = report;
+    this.data = dataset.map(function(d) {
+      const result = [];
+      const k = d.values.length;
+      for (let i = 0; i < k; i += 1) {
+        result[i] = d.values[i];
+      }
+      return result;
+    });
+
     this.initSVG();
     this.drawPath();
     this.drawAxis();
@@ -57,8 +66,9 @@ export class LineChartComponent implements OnInit {
       .attr('width', this.width)
       .attr('height', this.height);
 
-    this.xScale = d3Scale.scaleLinear()
-      .domain([2000, 2013])
+    console.log(this.data[0][0][0]);
+    this.xScale = d3Scale.scaleTime()
+      .domain([this.data[0][0][0], this.data[0][6][0]])
       .range([ 0 , this.width - padding.left - padding.right ]);
 
     this.yScale = d3Scale.scaleLinear()
@@ -96,7 +106,7 @@ export class LineChartComponent implements OnInit {
     this.svg.append('g')
     .attr('class', 'axis')
     .attr('transform', 'translate(' + this.padding.left + ',' + (this.height - this.padding.bottom) +  ')')
-    .call(d3Axis.axisBottom(this.xScale).tickFormat(d3Format.format('.4')));
+    .call(d3Axis.axisBottom(this.xScale).ticks(7));
 
     this.svg.append('g')
     .attr('class', 'axis')
