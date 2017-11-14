@@ -19,8 +19,18 @@ export class LineChartComponent implements OnInit {
   sendReport: Object[];
   title = '收發文狀態統計';
 
+  padding = { top: 50 , right: 50, bottom: 50, left: 50 };
+
   svg: any;
   maxValue: any;
+
+  width = 1180;
+  height = 480;
+
+  xScale;
+  yScale;
+  linePath;
+  colors;
 
   gMark: any;
 
@@ -28,15 +38,50 @@ export class LineChartComponent implements OnInit {
 
   ngOnInit() {
     this.sendReport = report;
-    this.initChart();
+    this.initSVG();
+    this.drawPath();
+    this.drawAxis();
+    this.drawTooltip();
   }
 
-  private bindLinePath(padding: any, linePath: any, colors: any): void {
+  private initSVG(): void {
+    const padding = { top: 50 , right: 50, bottom: 50, left: 50 };
+    this.maxValue = d3Array.max(dataset, function(c) {
+      return d3Array.max(c.values, function(d) {
+        return d[1];
+      });
+    });
+
+    this.svg = d3.select('body #lineChart')
+      .append('svg')
+      .attr('width', this.width)
+      .attr('height', this.height);
+
+    this.xScale = d3Scale.scaleLinear()
+      .domain([2000, 2013])
+      .range([ 0 , this.width - padding.left - padding.right ]);
+
+    this.yScale = d3Scale.scaleLinear()
+      .domain([0, this.maxValue * 1.1])
+      .range([ this.height - padding.top - padding.bottom , 0 ]);
+
+    this.colors = [ '#00f' , '#0f0' ];
+  }
+
+  private drawPath(): void {
+    const colors = this.colors;
+    const xScale = this.xScale;
+    const yScale = this.yScale;
+    const linePath = d3Shape.line()
+    .curve(d3Shape.curveBasis)
+    .x(function(d){ return xScale(d[0]); })
+    .y(function(d){ return yScale(d[1]); });
+
     this.svg.selectAll('path')
     .data(dataset)
     .enter()
     .append('path')
-    .attr('transform', 'translate(' + padding.left + ',' +  padding.top  + ')')
+    .attr('transform', 'translate(' + this.padding.left + ',' +  this.padding.top  + ')')
     .attr('d', function(d) {
       return linePath(d.values);
     })
@@ -47,37 +92,23 @@ export class LineChartComponent implements OnInit {
     });
   }
 
-  private initChart(): void {
-    const width = 1180;
-    const height = 480;
-    const padding = { top: 50 , right: 50, bottom: 50, left: 50 };
-    this.maxValue = d3Array.max(dataset, function(c) {
-      return d3Array.max(c.values, function(d) {
-        return d[1];
-      });
-    });
+  private drawAxis(): void {
+    this.svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', 'translate(' + this.padding.left + ',' + (this.height - this.padding.bottom) +  ')')
+    .call(d3Axis.axisBottom(this.xScale).tickFormat(d3Format.format('.4')));
 
-    this.svg = d3.select('body #lineChart')
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height);
+    this.svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', 'translate(' + this.padding.left + ',' + this.padding.top +  ')')
+    .call(d3Axis.axisLeft(this.yScale));
+  }
 
-    const xScale = d3Scale.scaleLinear()
-      .domain([2000, 2013])
-      .range([ 0 , width - padding.left - padding.right ]);
-
-    const yScale = d3Scale.scaleLinear()
-      .domain([0, this.maxValue * 1.1])
-      .range([ height - padding.top - padding.bottom , 0 ]);
-
-    const linePath = d3Shape.line()
-      .curve(d3Shape.curveBasis)
-      .x(function(d){ return xScale(d[0]); })
-      .y(function(d){ return yScale(d[1]); });
-
-    const colors = [ '#00f' , '#0f0' ];
-
-    this.bindLinePath(padding, linePath, colors);
+  private drawTooltip(): void {
+    const height = this.height;
+    const padding = this.padding;
+    const xScale = this.xScale;
+    const colors = this.colors;
 
     // 加入垂直於x軸的對齊線
     const vLine = this.svg.append('line')
@@ -107,10 +138,10 @@ export class LineChartComponent implements OnInit {
     // 加入一個透明的監視滑鼠事件用的矩形
     this.svg.append('rect')
       .attr('class', 'overlay')
-      .attr('x', padding.left)
-      .attr('y', padding.top)
-      .attr('width', width - padding.left - padding.right)
-      .attr('height', height - padding.top - padding.bottom)
+      .attr('x', this.padding.left)
+      .attr('y', this.padding.top)
+      .attr('width', this.width - this.padding.left - this.padding.right)
+      .attr('height', this.height - this.padding.top - this.padding.bottom)
       .on('mouseover', function() {
         tooltip.style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY + 20) + 'px')
@@ -179,15 +210,7 @@ export class LineChartComponent implements OnInit {
           .attr('transform', function(d, i){
             return 'translate(' + (padding.left + i * markStep)  + ',' + ( height - padding.bottom + 40)  + ')';
           });
-    this.svg.append('g')
-          .attr('class', 'axis')
-          .attr('transform', 'translate(' + padding.left + ',' + (height - padding.bottom) +  ')')
-          .call(d3Axis.axisBottom(xScale).tickFormat(d3Format.format('.4')));
 
-    this.svg.append('g')
-          .attr('class', 'axis')
-          .attr('transform', 'translate(' + padding.left + ',' + padding.top +  ')')
-          .call(d3Axis.axisLeft(yScale));
 
     this.gMark.append('rect')
           .attr('x', 0)
