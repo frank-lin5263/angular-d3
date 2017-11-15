@@ -31,6 +31,7 @@ export class LineChartComponent implements OnInit {
   yScale;
   linePath;
   colors;
+  tick;
 
   gMark: any;
 
@@ -38,15 +39,8 @@ export class LineChartComponent implements OnInit {
 
   ngOnInit() {
     this.sendReport = report;
-    this.data = dataset.map(function(d) {
-      const result = [];
-      const k = d.values.length;
-      for (let i = 0; i < k; i += 1) {
-        result[i] = d.values[i];
-      }
-      return result;
-    });
 
+    this.tick = 7;
     this.initSVG();
     this.drawPath();
     this.drawAxis();
@@ -66,9 +60,8 @@ export class LineChartComponent implements OnInit {
       .attr('width', this.width)
       .attr('height', this.height);
 
-    console.log(this.data[0][0]);
     this.xScale = d3Scale.scaleLinear()
-      .domain([ 1, 30 ])
+      .domain([ 30 - this.tick, 30])
       .range([ 0 , this.width -  this.padding.left -  this.padding.right ]);
 
     this.yScale = d3Scale.scaleLinear()
@@ -83,7 +76,6 @@ export class LineChartComponent implements OnInit {
     const xScale = this.xScale;
     const yScale = this.yScale;
     const linePath = d3Shape.line()
-    // .curve(d3Shape.curveBasis)
     .x(function(d){
       const x = xScale(d[0]);
       return x;
@@ -112,7 +104,7 @@ export class LineChartComponent implements OnInit {
     this.svg.append('g')
     .attr('class', 'axis')
     .attr('transform', 'translate(' + this.padding.left + ',' + (this.height - this.padding.bottom) +  ')')
-    .call(d3Axis.axisBottom(this.xScale));
+    .call(d3Axis.axisBottom(this.xScale).ticks(this.tick));
 
     this.svg.append('g')
     .attr('class', 'axis')
