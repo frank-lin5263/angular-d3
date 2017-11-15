@@ -67,8 +67,8 @@ export class LineChartComponent implements OnInit {
       .attr('height', this.height);
 
     console.log(this.data[0][0]);
-    this.xScale = d3Scale.scaleTime()
-      .domain([this.data[0][0][0], this.data[0][6][0]] )
+    this.xScale = d3Scale.scaleLinear()
+      .domain([ 1, 30 ])
       .range([ 0 , this.width -  this.padding.left -  this.padding.right ]);
 
     this.yScale = d3Scale.scaleLinear()
@@ -112,7 +112,7 @@ export class LineChartComponent implements OnInit {
     this.svg.append('g')
     .attr('class', 'axis')
     .attr('transform', 'translate(' + this.padding.left + ',' + (this.height - this.padding.bottom) +  ')')
-    .call(d3Axis.axisBottom(this.xScale).ticks(7));
+    .call(d3Axis.axisBottom(this.xScale));
 
     this.svg.append('g')
     .attr('class', 'axis')
@@ -174,13 +174,15 @@ export class LineChartComponent implements OnInit {
         const mouseX = d3.mouse(this)[0] - padding.left;
         const mouseY = d3.mouse(this)[1] - padding.top;
 
-        const x0 = xScale.invert( mouseX );
+        let x0 = xScale.invert( mouseX );
+
+        x0 = Math.round(x0);
 
         const bisect = d3Array.bisector( function(d) { return d[0]; }).left;
         const index = bisect(data, x0);
 
 
-        const date = x0.toISOString().substring(0, 10);
+        const date = '10-' + x0;
         const gdp = [];
         for ( let k = 0; k < dataset.length; k++ ) {
           gdp[k] = { id: dataset[k].id, value: dataset[k].values[index][1]};
@@ -199,9 +201,7 @@ export class LineChartComponent implements OnInit {
         tooltip.style('left', (d3.event.pageX) + 'px')
             .style('top', (d3.event.pageY + 20) + 'px');
 
-        const vlx = xScale(data[index][0]) - 1; // + padding.left;
-        // console.log('vlx: ', vlx);
-
+        const vlx = xScale(data[index][0]) + padding.left;
 
         vLine.attr('x1', vlx)
           .attr('y1', padding.top)
