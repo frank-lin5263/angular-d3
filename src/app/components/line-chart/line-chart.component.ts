@@ -54,7 +54,7 @@ export class LineChartComponent implements OnInit {
   }
 
   private initSVG(): void {
-    const padding = { top: 50 , right: 50, bottom: 50, left: 50 };
+    const padding = this.padding;
     this.maxValue = d3Array.max(dataset, function(c) {
       return d3Array.max(c.values, function(d) {
         return d[1];
@@ -66,10 +66,10 @@ export class LineChartComponent implements OnInit {
       .attr('width', this.width)
       .attr('height', this.height);
 
-    console.log(this.data[0][0][0]);
+    console.log(this.data[0][0]);
     this.xScale = d3Scale.scaleTime()
-      .domain([this.data[0][0][0], this.data[0][6][0]])
-      .range([ 0 , this.width - padding.left - padding.right ]);
+      .domain([this.data[0][0][0], this.data[0][6][0]] )
+      .range([ 0 , this.width -  this.padding.left -  this.padding.right ]);
 
     this.yScale = d3Scale.scaleLinear()
       .domain([0, this.maxValue * 1.1])
@@ -83,9 +83,15 @@ export class LineChartComponent implements OnInit {
     const xScale = this.xScale;
     const yScale = this.yScale;
     const linePath = d3Shape.line()
-    .curve(d3Shape.curveBasis)
-    .x(function(d){ return xScale(d[0]); })
-    .y(function(d){ return yScale(d[1]); });
+    // .curve(d3Shape.curveBasis)
+    .x(function(d){
+      const x = xScale(d[0]);
+      return x;
+    })
+    .y(function(d){
+      const y = yScale(d[1]);
+      return y;
+    });
 
     this.svg.selectAll('path')
     .data(dataset)
@@ -165,46 +171,38 @@ export class LineChartComponent implements OnInit {
       .on('mousemove',  function() {
         const data = dataset[0].values;
 
-        // 取得滑鼠相對於透明矩形左上角的座標，左上角座標為(0,0)
         const mouseX = d3.mouse(this)[0] - padding.left;
         const mouseY = d3.mouse(this)[1] - padding.top;
-        // 透過比例尺的反函數計算原資料中的值，例如x0為某個年份，y0為GDP值
-        let x0 = xScale.invert( mouseX );
-        // const y0 = yScale.invert( mouseY );
-        // 對x0四捨五入，若果x0是2005.6，則傳回2006；若果是2005.2，則傳回2005
-        x0 = Math.round(x0);
-        // 查詢在原陣列中x0的值，並傳回索引號
-        const bisect = d3Array.bisector( function(d) { return d[0]; }).left;
-        const index = bisect(data, x0) ;
 
-        // 取得年份和gdp資料
-        const year = x0;
+        const x0 = xScale.invert( mouseX );
+
+        const bisect = d3Array.bisector( function(d) { return d[0]; }).left;
+        const index = bisect(data, x0);
+
+
+        const date = x0.toISOString().substring(0, 10);
         const gdp = [];
         for ( let k = 0; k < dataset.length; k++ ) {
           gdp[k] = { id: dataset[k].id, value: dataset[k].values[index][1]};
         }
 
-        // 設定提示框的標題文字（年份）
-        title.html('<strong>' + year + '年</strong>');
+        title.html('<strong>' + date + '</strong>');
 
-        // 設定彩色標示的彩色
         desColor.style('background-color', function(d, i) {
           return colors[i];
         });
 
-        // 設定描述文字的內容
         desText.html( function(d, i){
           return gdp[i].id + '\t' + '<strong>' + gdp[i].value + '</strong>';
         });
 
-        // 設定提示框的位置
         tooltip.style('left', (d3.event.pageX) + 'px')
             .style('top', (d3.event.pageY + 20) + 'px');
 
-        // 取得垂直對齊線的x座標
-        const vlx = xScale(data[index][0]) + padding.left;
+        const vlx = xScale(data[index][0]) - 1; // + padding.left;
+        // console.log('vlx: ', vlx);
 
-        // 設定垂直對齊線的起點和終點
+
         vLine.attr('x1', vlx)
           .attr('y1', padding.top)
           .attr('x2', vlx)
