@@ -5,10 +5,10 @@
       <div class="form-group">
         <label class="col-md-offset-2 col-md-2 control-label">日期</label>
         <div class="col-md-2">
-          <select class="form-control" name="docType">
-            <option value="">最近1日</option>
-            <option value="">最近7日</option>
-            <option value="">最近30日</option>
+          <select #c class="form-control" name="docType" (change)="redrawChart({tick:c.value})">
+            <option value="1">1日</option>
+            <option value="7" selected="selected">7日</option>
+            <option value="30">30日</option>
           </select>
         </div>
       </div>

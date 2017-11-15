@@ -31,16 +31,19 @@ export class LineChartComponent implements OnInit {
   yScale;
   linePath;
   colors;
-  tick;
+  tick = 7;
 
   gMark: any;
 
   constructor() { }
 
+  redrawChart(tick) {
+    console.log(tick);
+    this.tick = tick;
+  }
+
   ngOnInit() {
     this.sendReport = report;
-
-    this.tick = 7;
     this.initSVG();
     this.drawPath();
     this.drawAxis();
@@ -118,12 +121,10 @@ export class LineChartComponent implements OnInit {
     const xScale = this.xScale;
     const colors = this.colors;
 
-    // 加入垂直於x軸的對齊線
     const vLine = this.svg.append('line')
       .attr('class', 'focusLine')
       .style('display', 'none');
 
-    // 加入一個提示框
     const tooltip = d3.select('body')
       .append('div')
       .attr('class', 'tooltip')
@@ -143,7 +144,6 @@ export class LineChartComponent implements OnInit {
     const desText = des.append('div')
       .attr('class', 'desText');
 
-    // 加入一個透明的監視滑鼠事件用的矩形
     this.svg.append('rect')
       .attr('class', 'overlay')
       .attr('x', this.padding.left)
