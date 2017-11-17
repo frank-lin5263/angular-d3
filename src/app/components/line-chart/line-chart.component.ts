@@ -29,7 +29,7 @@ export class LineChartComponent implements OnInit {
 
   xScale;
   yScale;
-  linePath;
+  line;
   colors;
   tick = 30;
 
@@ -39,7 +39,15 @@ export class LineChartComponent implements OnInit {
 
   redrawChart(value) {
     console.log(value);
-    // this.tick = tick;
+    if (value.id === '1') {
+      this.tick = 1;
+    } else if (value.id === '2') {
+      this.tick = 7;
+    } else if (value.id === '3') {
+      this.tick = 30;
+    }
+    // this.bind();
+    // this.render();
   }
 
   ngOnInit() {
@@ -76,6 +84,7 @@ export class LineChartComponent implements OnInit {
   }
 
   private render(): void {
+    console.log('render: ' + this.tick);
     this.xScale = d3Scale.scaleLinear()
     .domain([ 31 - this.tick, 30])
     .range([ 0 , this.width -  this.padding.left -  this.padding.right ]);
@@ -84,30 +93,22 @@ export class LineChartComponent implements OnInit {
     .domain([0, this.maxValue * 1.1])
     .range([ this.height - this.padding.top - this.padding.bottom , 0 ]);
 
+    this.line = d3Shape.line()
+    .x( (d: any) => this.xScale(d[0]) )
+    .y( (d: any) => this.yScale(d[1]) );
+
     this.drawPath();
-    this.drawAxis();
     this.drawTooltip();
+    this.drawAxis();
   }
 
   private drawPath(): void {
     const colors = this.colors;
-    const xScale = this.xScale;
-    const yScale = this.yScale;
-    const linePath = d3Shape.line()
-    .x(function(d){
-      const x = xScale(d[0]);
-      return x;
-    })
-    .y(function(d){
-      const y = yScale(d[1]);
-      return y;
-    });
+    const linePath = this.line;
 
     this.svg.selectAll('path')
     .attr('transform', 'translate(' + this.padding.left + ',' +  this.padding.top  + ')')
-    .attr('d', function(d) {
-      return linePath(d.values);
-    })
+    .attr('d', (d) => this.line(d.values) )
     .attr('fill', 'none')
     .attr('stroke-width', 3)
     .attr('stroke', function(d, i){
