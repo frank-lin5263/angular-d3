@@ -17,7 +17,7 @@ import { report } from '../../shared/dataset';
 })
 export class LineChartComponent implements OnInit {
   sendReport: Object[];
-  title = '收發文狀態統計';
+  title = '發文統計';
 
   padding = { top: 50 , right: 50, bottom: 50, left: 50 };
   data: any;
@@ -31,27 +31,25 @@ export class LineChartComponent implements OnInit {
   yScale;
   linePath;
   colors;
-  tick = 7;
+  tick = 30;
 
   gMark: any;
 
   constructor() { }
 
-  redrawChart(tick) {
-    console.log(tick);
-    this.tick = tick;
+  redrawChart(value) {
+    console.log(value);
+    // this.tick = tick;
   }
 
   ngOnInit() {
     this.sendReport = report;
     this.initSVG();
-    this.drawPath();
-    this.drawAxis();
-    this.drawTooltip();
+    this.bind();
+    this.render();
   }
 
   private initSVG(): void {
-    const padding = this.padding;
     this.maxValue = d3Array.max(dataset, function(c) {
       return d3Array.max(c.values, function(d) {
         return d[1];
@@ -63,15 +61,32 @@ export class LineChartComponent implements OnInit {
       .attr('width', this.width)
       .attr('height', this.height);
 
+     this.colors = [ '#00f' , '#0f0' ];
+
+    d3.select('svg').append('g').attr('id', 'axisX');
+    d3.select('svg').append('g').attr('id', 'axisY');
+  }
+
+  private bind(): void {
+    const selection = d3.select('svg')
+                        .selectAll('path')
+                        .data(dataset);
+    selection.enter().append('path');
+    selection.exit().remove();
+  }
+
+  private render(): void {
     this.xScale = d3Scale.scaleLinear()
-      .domain([ 30 - this.tick, 30])
-      .range([ 0 , this.width -  this.padding.left -  this.padding.right ]);
+    .domain([ 31 - this.tick, 30])
+    .range([ 0 , this.width -  this.padding.left -  this.padding.right ]);
 
     this.yScale = d3Scale.scaleLinear()
-      .domain([0, this.maxValue * 1.1])
-      .range([ this.height - padding.top - padding.bottom , 0 ]);
+    .domain([0, this.maxValue * 1.1])
+    .range([ this.height - this.padding.top - this.padding.bottom , 0 ]);
 
-    this.colors = [ '#00f' , '#0f0' ];
+    this.drawPath();
+    this.drawAxis();
+    this.drawTooltip();
   }
 
   private drawPath(): void {
@@ -89,9 +104,6 @@ export class LineChartComponent implements OnInit {
     });
 
     this.svg.selectAll('path')
-    .data(dataset)
-    .enter()
-    .append('path')
     .attr('transform', 'translate(' + this.padding.left + ',' +  this.padding.top  + ')')
     .attr('d', function(d) {
       return linePath(d.values);
@@ -104,12 +116,15 @@ export class LineChartComponent implements OnInit {
   }
 
   private drawAxis(): void {
-    this.svg.append('g')
+    this.svg.select('g#axisX')
     .attr('class', 'axis')
     .attr('transform', 'translate(' + this.padding.left + ',' + (this.height - this.padding.bottom) +  ')')
-    .call(d3Axis.axisBottom(this.xScale).ticks(this.tick));
+    .call(d3Axis.axisBottom(this.xScale).ticks(this.tick)
+    .tickFormat(function (d: number) {
+      return '10-' + d;
+    }));
 
-    this.svg.append('g')
+    this.svg.select('g#axisY')
     .attr('class', 'axis')
     .attr('transform', 'translate(' + this.padding.left + ',' + this.padding.top +  ')')
     .call(d3Axis.axisLeft(this.yScale));
